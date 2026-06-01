@@ -1,0 +1,2 @@
+# O431_zephyr_skystar_stm32f407
+嘉立创天空星开发板的zephyr设置
