@@ -1,0 +1,21 @@
+identifier: skystar_stm32f407
+name: Skystar STM32F407VET6 Development Board
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+ram: 192
+flash: 512
+supported:
+  - gpio
+  - spi
+  - pwm
+  - i2c
+  - counter
+  - adc
+  - qdec
+  - uart
+  - usb_device
+  - can
+  - netif:eth
