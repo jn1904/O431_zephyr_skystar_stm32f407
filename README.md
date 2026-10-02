@@ -1,16 +1,15 @@
 # O431_zephyr_skystar_stm32f407
 
-Zephyr module containing two related boards:
+这是一个 Zephyr module，包含两个相关的板级配置：
 
-| Board name | Description |
+| Board 名称 | 说明 |
 |---|---|
-| `skystar_stm32f407` | SkyStar STM32F407VET6 core board + LCKFB FDB baseboard |
-| `skystar_stm32f407vet6` | SkyStar STM32F407VET6 core board only |
+| `skystar_stm32f407` | 天空星 STM32F407VET6 核心板 + 立创筑基学习板底板 |
+| `skystar_stm32f407vet6` | 只有天空星 STM32F407VET6 核心板 |
 
-Both boards use the same STM32F407VET6 SoC and are provided by a single
-Zephyr module.
+两个 board 都使用相同的 STM32F407VET6 SOC，统一放在同一个 Zephyr module 中维护。
 
-## Repository layout
+## 目录结构
 
 ```text
 O431_zephyr_skystar_stm32f407/
@@ -38,34 +37,34 @@ O431_zephyr_skystar_stm32f407/
 └── README.md
 ```
 
-## Board summary
+## 板级说明
 
-### `skystar_stm32f407` — core board + baseboard
+### `skystar_stm32f407` — 核心板 + 底板
 
-Full LCKFB FDB baseboard support, including:
+完整的立创筑基学习板支持，包括：
 
 - USART1 / USART2 / USART3 + RS485
-- I2C1 six-device bus and software I2C2
-- SPI1 LCD, SPI2 Flash / IMU / external SPI
-- SDIO / TF card
-- Ethernet LAN8720A, CAN1
-- WS2812, buzzer, relay, keys, EC11
-- DC motors, servos, TMC2209 stepper, HX711, 1-Wire
+- I2C1 六设备总线 + 软件 I2C2
+- SPI1 LCD、SPI2 Flash / IMU / 外部 SPI
+- SDIO / TF 卡
+- 以太网 LAN8720A、CAN1
+- WS2812、蜂鸣器、继电器、按键、EC11
+- 直流电机、舵机、TMC2209 步进电机、HX711、单总线
 
-### `skystar_stm32f407vet6` — core board only
+### `skystar_stm32f407vet6` — 只有核心板
 
-Minimal core board support:
+最小核心板支持：
 
-- LED on PB2
-- USART1 console on PA9 / PA10
-- USB FS on PA11 / PA12
-- SWD on PA13 / PA14, SWO on PB3
-- HSE 8 MHz and LSE 32.768 kHz
-- P1 / P2 headers described in the board documentation
+- LED：PB2
+- USART1 控制台：PA9 / PA10
+- USB FS：PA11 / PA12
+- SWD：PA13 / PA14，SWO：PB3
+- HSE 8 MHz、LSE 32.768 kHz
+- P1 / P2 排针说明见板级文档
 
-## Build
+## 构建
 
-The workspace `zephyr-env.sh` points `ZEPHYR_EXTRA_MODULES` at this module.
+工作区里的 `zephyr-env.sh` 会把本 module 加入 `ZEPHYR_EXTRA_MODULES`。
 
 ```bash
 cd /home/o431/sources/o431_obj
@@ -74,27 +73,27 @@ source ./zephyr-env.sh
 west boards -n '^skystar'
 ```
 
-Build the baseboard board:
+构建带底板的 board：
 
 ```bash
 west build -p always -b skystar_stm32f407
 ```
 
-Build the core board:
+构建只有核心板的 board：
 
 ```bash
 west build -p always -b skystar_stm32f407vet6
 ```
 
-## Flash
+## 烧录
 
 ```bash
 west flash
 ```
 
-Default runner for both boards is OpenOCD + CMSIS-DAP.
+两个 board 默认都使用 OpenOCD + CMSIS-DAP。
 
-Other runners:
+也可以显式指定其他烧录器：
 
 ```bash
 west flash -r pyocd
@@ -102,6 +101,6 @@ west flash -r jlink
 west flash -r dfu-util
 ```
 
-## License
+## 许可证
 
 MIT
