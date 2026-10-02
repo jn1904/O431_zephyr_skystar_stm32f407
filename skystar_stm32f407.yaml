@@ -19,3 +19,7 @@ supported:
   - usb_device
   - can
   - netif:eth
+  - eeprom
+  - i2s
+  - rtc
+  - sdhc

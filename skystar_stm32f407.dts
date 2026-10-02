@@ -14,363 +14,469 @@
 #include <zephyr/dt-bindings/display/panel.h>
 
 / {
-	model = "Skystar STM32F407 board";
-	compatible = "skystar,stm32f407";
+model = "Skystar STM32F407 baseboard";
+compatible = "skystar,stm32f407";
 
-	chosen {
-		zephyr,console = &usart1;
-		zephyr,shell-uart = &usart1;
-		zephyr,sram = &sram0;
-		zephyr,flash = &flash0;
-		zephyr,dtcm = &ccm0;
-	};
+chosen {
+zephyr,console = &usart1;
+zephyr,shell-uart = &usart1;
+zephyr,sram = &sram0;
+zephyr,flash = &flash0;
+zephyr,dtcm = &ccm0;
+};
 
-	leds {
-		compatible = "gpio-leds";
+leds {
+compatible = "gpio-leds";
 
-		green_led_1: led_1 {
-			gpios = <&gpiob 2 GPIO_ACTIVE_LOW>;
-			label = "User LD1";
-		};
+green_led_1: led_1 {
+gpios = <&gpiob 2 GPIO_ACTIVE_LOW>;
+label = "User LD1";
+};
+};
 
-		green_led_2: led_2 {
-			gpios = <&gpiob 8 GPIO_ACTIVE_LOW>;
-			label = "User LD2";
-		};
-	};
+relays {
+compatible = "gpio-leds";
 
-	buzz_0: buzz {
-		compatible = "gpio-buzzer";
-		gpios = <&gpioa 6 GPIO_ACTIVE_HIGH>;
-	};
+relay0: relay0 {
+gpios = <&gpioa 4 GPIO_ACTIVE_HIGH>;
+label = "Relay";
+};
+};
 
-	potentiometer {
-		compatible = "voltage-divider";
-		io-channels = <&adc1 10>;
-		output-ohms = <10000>;
-		full-ohms = <10000>;
-	};
+buzz_0: buzz {
+compatible = "gpio-buzzer";
+gpios = <&gpioa 6 GPIO_ACTIVE_HIGH>;
+};
 
-	led_strip: ws2812 {
-		compatible = "worldsemi,ws2812-gpio";
-		gpios = <&gpioa 3 GPIO_ACTIVE_HIGH>;
-		chain-length = <1>;
-		color-mapping = <LED_COLOR_ID_GREEN
-				 LED_COLOR_ID_RED
-				 LED_COLOR_ID_BLUE>;
-		reset-delay = <280>;
-	};
+potentiometer {
+compatible = "voltage-divider";
+io-channels = <&adc1 10>;
+output-ohms = <10000>;
+full-ohms = <10000>;
+};
 
-	mipi_dbi {
-		compatible = "zephyr,mipi-dbi-spi";
-		spi-dev = <&spi1>;
-		dc-gpios = <&gpiod 14 GPIO_ACTIVE_HIGH>;
-		reset-gpios = <&gpioe 1 GPIO_ACTIVE_LOW>;
-		#address-cells = <1>;
-		#size-cells = <0>;
+led_strip: ws2812 {
+compatible = "worldsemi,ws2812-gpio";
+gpios = <&gpioa 3 GPIO_ACTIVE_HIGH>;
+chain-length = <3>;
+color-mapping = <LED_COLOR_ID_GREEN
+ LED_COLOR_ID_RED
+ LED_COLOR_ID_BLUE>;
+reset-delay = <280>;
+};
 
-		st7789v: st7789v@0 {
-			compatible = "sitronix,st7789v";
-			reg = <0>;
-			mipi-max-frequency = <20000000>;
-			width = <240>;
-			height = <320>;
-			x-offset = <0>;
-			y-offset = <0>;
-			vcom = <0x19>;
-			gctrl = <0x35>;
-			vrhs = <0x12>;
-			vdvs = <0x20>;
-			mdac = <0x00>;
-			gamma = <0x01>;
-			pixel-format = <PANEL_PIXEL_FORMAT_RGB_565>;
-			lcm = <0x2c>;
-			porch-param = [0c 0c 00 33 33];
-			cmd2en-param = [5a 69 02 01];
-			pwctrl1-param = [a4 a1];
-			pvgam-param = [d0 04 0d 11 13 2b 3f 54 4c 18 0d 0b 1f 23];
-			nvgam-param = [d0 04 0c 11 13 2c 3f 44 51 2f 1f 1f 20 23];
-			ram-param = [00 f0];
-			rgb-param = [cd 08 14];
-			mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
-		};
-	};
+mipi_dbi {
+compatible = "zephyr,mipi-dbi-spi";
+spi-dev = <&spi1>;
+dc-gpios = <&gpiod 14 GPIO_ACTIVE_HIGH>;
+reset-gpios = <&gpioe 1 GPIO_ACTIVE_LOW>;
+#address-cells = <1>;
+#size-cells = <0>;
 
-	gpio_keys {
-		compatible = "gpio-keys";
+st7789v: st7789v@0 {
+compatible = "sitronix,st7789v";
+reg = <0>;
+mipi-max-frequency = <20000000>;
+width = <240>;
+height = <320>;
+x-offset = <0>;
+y-offset = <0>;
+vcom = <0x19>;
+gctrl = <0x35>;
+vrhs = <0x12>;
+vdvs = <0x20>;
+mdac = <0x00>;
+gamma = <0x01>;
+pixel-format = <PANEL_PIXEL_FORMAT_RGB_565>;
+lcm = <0x2c>;
+porch-param = [0c 0c 00 33 33];
+cmd2en-param = [5a 69 02 01];
+pwctrl1-param = [a4 a1];
+pvgam-param = [d0 04 0d 11 13 2b 3f 54 4c 18 0d 0b 1f 23];
+nvgam-param = [d0 04 0c 11 13 2c 3f 44 51 2f 1f 1f 20 23];
+ram-param = [00 f0];
+rgb-param = [cd 08 14];
+mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
+};
+};
 
-		user_button_0: K0 {
-			label = "Key K0";
-			gpios = <&gpioa 0 GPIO_ACTIVE_LOW>;
-			zephyr,code = <INPUT_KEY_0>;
-		};
+gpio_keys {
+compatible = "gpio-keys";
 
-		user_button_1: K1 {
-			label = "Key K1";
-			gpios = <&gpioe 8 GPIO_ACTIVE_LOW>;
-			zephyr,code = <INPUT_KEY_1>;
-		};
+user_button_0: K0 {
+label = "KEY1";
+gpios = <&gpioa 0 GPIO_ACTIVE_LOW>;
+zephyr,code = <INPUT_KEY_0>;
+};
 
-		user_button_UP: K_UP {
-			label = "Key WK_UP";
-			gpios = <&gpioc 13 GPIO_ACTIVE_HIGH>;
-			zephyr,code = <INPUT_KEY_UP>;
-		};
-	};
+user_button_1: K1 {
+label = "KEY2";
+gpios = <&gpioe 8 GPIO_ACTIVE_LOW>;
+zephyr,code = <INPUT_KEY_1>;
+};
 
-	aliases {
-		led0 = &green_led_1;
-		led1 = &green_led_2;
-		buzz = &buzz_0;
-		sw0 = &user_button_UP;
-		qdec0 = &qdec;
-	};
+user_button_UP: K_UP {
+label = "KEY3/EC11";
+gpios = <&gpioc 13 GPIO_ACTIVE_LOW>;
+zephyr,code = <INPUT_KEY_2>;
+};
+};
 
-	i2cgpio: i2c-gpio {
-		compatible = "gpio-i2c";
-		scl-gpios = <&gpiod 10 (GPIO_OPEN_DRAIN | GPIO_PULL_UP)>;
-		sda-gpios = <&gpioe 13 (GPIO_OPEN_DRAIN | GPIO_PULL_UP)>;
-		#address-cells = <1>;
-		#size-cells = <0>;
-		clock-frequency = <100000>;
-		status = "okay";
+aliases {
+led0 = &green_led_1;
+buzz = &buzz_0;
+sw0 = &user_button_0;
+sw1 = &user_button_1;
+sw2 = &user_button_UP;
+qdec0 = &qdec;
+qdec1 = &qdec1;
+qdec2 = &qdec2;
+sdhc0 = &sdmmc1;
+stepper-driver = &tmc2209;
+stepper-ctrl = &step_dir_motion_control;
+};
 
-		ft6336: touch@38 {
-			compatible = "focaltech,ft5336";
-			reg = <0x38>;
-			int-gpios = <&gpioe 2 GPIO_ACTIVE_LOW>;
-			reset-gpios = <&gpioe 1 GPIO_ACTIVE_LOW>;
-		};
+i2cgpio: i2c-gpio {
+compatible = "gpio-i2c";
+scl-gpios = <&gpiod 10 (GPIO_OPEN_DRAIN | GPIO_PULL_UP)>;
+sda-gpios = <&gpioe 13 (GPIO_OPEN_DRAIN | GPIO_PULL_UP)>;
+#address-cells = <1>;
+#size-cells = <0>;
+clock-frequency = <100000>;
+status = "okay";
 
-		ap3216c: sensor@1e {
-			compatible = "liteon,ap3216c";
-			reg = <0x1e>;
-		};
-	};
+ft6336: touch@38 {
+compatible = "focaltech,ft5336";
+reg = <0x38>;
+int-gpios = <&gpioe 2 GPIO_ACTIVE_LOW>;
+reset-gpios = <&gpioe 1 GPIO_ACTIVE_LOW>;
+};
+
+ap3216c: sensor@1e {
+compatible = "liteon,ap3216c";
+reg = <0x1e>;
+};
+};
+
+w1: w1 {
+compatible = "zephyr,w1-gpio";
+gpios = <&gpioa 8 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN | GPIO_PULL_UP)>;
+status = "okay";
+};
+
+tmc2209: tmc2209 {
+compatible = "adi,tmc2209";
+status = "okay";
+en-gpios = <&gpiod 7 GPIO_ACTIVE_LOW>;
+micro-step-res = <8>;
+};
+
+step_dir_motion_control: motion-controller {
+compatible = "zephyr,gpio-step-dir-stepper-ctrl";
+status = "okay";
+step-gpios = <&gpioa 15 GPIO_ACTIVE_HIGH>;
+dir-gpios = <&gpiod 4 GPIO_ACTIVE_HIGH>;
+stepper-driver = <&tmc2209>;
+};
+
+hx711_spi: spi {
+compatible = "zephyr,spi-bitbang";
+status = "okay";
+clk-gpios = <&gpiob 1 GPIO_ACTIVE_HIGH>;
+sdi-gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;
+#address-cells = <1>;
+#size-cells = <0>;
+
+hx711: hx711@0 {
+compatible = "avia,hx711-spi";
+reg = <0>;
+status = "okay";
+spi-max-frequency = <1000000>;
+gain = <128>;
+avdd = <3300>;
+dout-trig-gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;
+};
+};
 };
 
 &clk_lsi {
-	status = "okay";
+status = "okay";
 };
 
 &clk_hse {
-	clock-frequency = <DT_FREQ_M(8)>;
-	status = "okay";
+clock-frequency = <DT_FREQ_M(8)>;
+status = "okay";
 };
 
 &pll {
-	div-m = <8>;
-	mul-n = <336>;
-	div-p = <2>;
-	div-q = <7>;
-	clocks = <&clk_hse>;
-	status = "okay";
+div-m = <8>;
+mul-n = <336>;
+div-p = <2>;
+div-q = <7>;
+clocks = <&clk_hse>;
+status = "okay";
 };
 
 &rcc {
-	clocks = <&pll>;
-	clock-frequency = <DT_FREQ_M(168)>;
-	ahb-prescaler = <1>;
-	apb1-prescaler = <4>;
-	apb2-prescaler = <2>;
+clocks = <&pll>;
+clock-frequency = <DT_FREQ_M(168)>;
+ahb-prescaler = <1>;
+apb1-prescaler = <4>;
+apb2-prescaler = <2>;
 };
 
 &usart1 {
-	pinctrl-0 = <&usart1_tx_pa9 &usart1_rx_pa10>;
-	pinctrl-names = "default";
-	current-speed = <115200>;
-	status = "okay";
+pinctrl-0 = <&usart1_tx_pa9 &usart1_rx_pa10>;
+pinctrl-names = "default";
+current-speed = <115200>;
+status = "okay";
 };
 
 &usart2 {
-	pinctrl-0 = <&usart2_tx_pa2 &usart2_rx_pa3>;
-	pinctrl-names = "default";
-	current-speed = <115200>;
-	status = "okay";
+pinctrl-0 = <&usart2_tx_pd5 &usart2_rx_pd6>;
+pinctrl-names = "default";
+current-speed = <115200>;
+status = "okay";
 };
 
-&timers2 {
-	status = "okay";
+&usart3 {
+pinctrl-0 = <&usart3_tx_pd8 &usart3_rx_pd9>;
+pinctrl-names = "default";
+current-speed = <115200>;
+status = "okay";
 
-	pwm2: pwm {
-		status = "okay";
-		pinctrl-0 = <&tim2_ch1_pa0>;
-		pinctrl-names = "default";
-	};
+modbus0: modbus0 {
+compatible = "zephyr,modbus-serial";
+de-gpios = <&gpiod 15 GPIO_ACTIVE_HIGH>;
+};
+};
+
+&timers1 {
+status = "okay";
+
+qdec2: qdec {
+status = "okay";
+pinctrl-0 = <&tim1_ch1_pe9 &tim1_ch2_pe11>;
+pinctrl-names = "default";
+st,counts-per-revolution = <1>;
+};
+};
+
+&timers3 {
+status = "okay";
+
+qdec1: qdec {
+status = "okay";
+pinctrl-0 = <&tim3_ch1_pb4 &tim3_ch2_pc7>;
+pinctrl-names = "default";
+st,counts-per-revolution = <1>;
+};
 };
 
 &timers4 {
-	status = "okay";
+status = "okay";
 
-	qdec: qdec {
-		status = "okay";
-		pinctrl-0 = <&tim4_ch1_pd12 &tim4_ch2_pd13>;
-		pinctrl-names = "default";
-		st,counts-per-revolution = <20>;
-	};
+qdec: qdec {
+status = "okay";
+pinctrl-0 = <&tim4_ch1_pd12 &tim4_ch2_pd13>;
+pinctrl-names = "default";
+st,counts-per-revolution = <20>;
+};
 };
 
 &rtc {
-	clocks = <&rcc STM32_CLOCK(APB1, 28)>,
-		 <&rcc STM32_SRC_LSI RTC_SEL(2)>;
-	status = "okay";
+clocks = <&rcc STM32_CLOCK(APB1, 28)>,
+ <&rcc STM32_SRC_LSI RTC_SEL(2)>;
+status = "okay";
 };
 
 &i2c1 {
-	pinctrl-0 = <&i2c1_scl_pb6 &i2c1_sda_pb7>;
-	pinctrl-names = "default";
-	status = "okay";
+pinctrl-0 = <&i2c1_scl_pb6 &i2c1_sda_pb7>;
+pinctrl-names = "default";
+status = "okay";
 
-	aht20: aht20@38 {
-		compatible = "aosong,aht20";
-		reg = <0x38>;
-	};
+aht20: aht20@38 {
+compatible = "aosong,aht20";
+reg = <0x38>;
+};
 
-	sd3078: rtc@32 {
-		compatible = "whwave,sd3078";
-		reg = <0x32>;
-	};
+sd3078: rtc@32 {
+compatible = "whwave,sd3078";
+reg = <0x32>;
+};
 
-	eeprom0: eeprom@50 {
-		compatible = "atmel,at24c02", "atmel,at24";
-		reg = <0x50>;
-		size = <256>;
-		pagesize = <8>;
-		address-width = <8>;
-		timeout = <5>;
-	};
+eeprom0: eeprom@50 {
+compatible = "atmel,at24c02", "atmel,at24";
+reg = <0x50>;
+size = <256>;
+pagesize = <8>;
+address-width = <8>;
+timeout = <5>;
+};
 
-	es8388: audio-codec@10 {
-		compatible = "everest,es8388";
-		reg = <0x10>;
-	};
+es8388: audio-codec@10 {
+compatible = "everest,es8388";
+reg = <0x10>;
+};
 
-	pca9555: gpio@20 {
-		compatible = "nxp,pca9555";
-		reg = <0x20>;
-		gpio-controller;
-		#gpio-cells = <2>;
-		ngpios = <16>;
-	};
+pca9555: gpio@20 {
+compatible = "nxp,pca9555";
+reg = <0x20>;
+gpio-controller;
+#gpio-cells = <2>;
+ngpios = <16>;
+};
 
-	ina226: ina226@40 {
-		compatible = "ti,ina226";
-		reg = <0x40>;
-		current-lsb-microamps = <300>;
-		rshunt-micro-ohms = <10000>;
-	};
+ina226: ina226@40 {
+compatible = "ti,ina226";
+reg = <0x40>;
+current-lsb-microamps = <300>;
+rshunt-micro-ohms = <10000>;
+};
 };
 
 &adc1 {
-	pinctrl-0 = <&adc1_in10_pc0>;
-	pinctrl-names = "default";
-	st,adc-prescaler = <4>;
-	status = "okay";
+pinctrl-0 = <&adc1_in10_pc0>;
+pinctrl-names = "default";
+st,adc-prescaler = <4>;
+status = "okay";
 };
 
 &spi1 {
-	pinctrl-0 = <&spi1_sck_pa5 &spi1_mosi_pb5>;
-	pinctrl-names = "default";
-	cs-gpios = <&gpioe 14 GPIO_ACTIVE_LOW>;
-	status = "okay";
+pinctrl-0 = <&spi1_sck_pa5 &spi1_mosi_pb5>;
+pinctrl-names = "default";
+cs-gpios = <&gpioe 14 GPIO_ACTIVE_LOW>;
+status = "okay";
 };
 
 &spi2 {
-	pinctrl-0 = <&spi2_sck_pb10 &spi2_miso_pc2 &spi2_mosi_pc3>;
-	pinctrl-names = "default";
-	cs-gpios = <&gpioe 7 GPIO_ACTIVE_LOW>, <&gpioe 4 GPIO_ACTIVE_LOW>;
-	status = "okay";
+pinctrl-0 = <&spi2_sck_pb10 &spi2_miso_pc2 &spi2_mosi_pc3>;
+pinctrl-names = "default";
+cs-gpios = <&gpioe 7 GPIO_ACTIVE_LOW>,
+   <&gpioe 4 GPIO_ACTIVE_LOW>,
+   <&gpiod 11 GPIO_ACTIVE_LOW>,
+   <&gpioe 0 GPIO_ACTIVE_LOW>,
+   <&gpioe 15 GPIO_ACTIVE_LOW>;
+status = "okay";
 
-	icm42688: icm42688@0 {
-		compatible = "invensense,icm42688", "invensense,icm4268x";
-		reg = <0>;
-		spi-max-frequency = <10000000>;
-		accel-pwr-mode = <3>;
-		gyro-pwr-mode = <3>;
-		accel-fs = <3>;
-		gyro-fs = <7>;
-		accel-odr = <8>;
-		gyro-odr = <8>;
-	};
+icm42688: icm42688@0 {
+compatible = "invensense,icm42688", "invensense,icm4268x";
+reg = <0>;
+spi-max-frequency = <10000000>;
+accel-pwr-mode = <3>;
+gyro-pwr-mode = <3>;
+accel-fs = <3>;
+gyro-fs = <7>;
+accel-odr = <8>;
+gyro-odr = <8>;
+};
 
-	w25q128: w25q128@1 {
-		compatible = "jedec,spi-nor";
-		reg = <1>;
-		spi-max-frequency = <40000000>;
-		size = <DT_SIZE_M(128)>;
-		jedec-id = [ef 40 18];
-		has-dpd;
-		t-enter-dpd = <3000>;
-		t-exit-dpd = <3000>;
-	};
+w25q128: w25q128@1 {
+compatible = "jedec,spi-nor";
+reg = <1>;
+spi-max-frequency = <40000000>;
+size = <DT_SIZE_M(128)>;
+jedec-id = [ef 40 18];
+has-dpd;
+t-enter-dpd = <3000>;
+t-exit-dpd = <3000>;
+};
 };
 
 zephyr_udc0: &usbotg_fs {
-	pinctrl-0 = <&usb_otg_fs_dm_pa11 &usb_otg_fs_dp_pa12>;
-	pinctrl-names = "default";
-	status = "okay";
+pinctrl-0 = <&usb_otg_fs_dm_pa11 &usb_otg_fs_dp_pa12>;
+pinctrl-names = "default";
+status = "okay";
 };
 
 &mac {
-	status = "okay";
-	pinctrl-0 = <&eth_ref_clk_pa1
-		     &eth_crs_dv_pa7
-		     &eth_rxd0_pc4
-		     &eth_rxd1_pc5
-		     &eth_tx_en_pb11
-		     &eth_txd0_pb12
-		     &eth_txd1_pb13>;
-	pinctrl-names = "default";
-	phy-connection-type = "rmii";
-	phy-handle = <&eth_phy>;
+status = "okay";
+pinctrl-0 = <&eth_ref_clk_pa1
+     &eth_crs_dv_pa7
+     &eth_rxd0_pc4
+     &eth_rxd1_pc5
+     &eth_tx_en_pb11
+     &eth_txd0_pb12
+     &eth_txd1_pb13>;
+pinctrl-names = "default";
+phy-connection-type = "rmii";
+phy-handle = <&eth_phy>;
 };
 
 &mdio {
-	status = "okay";
-	pinctrl-0 = <&eth_mdio_pa2 &eth_mdc_pc1>;
-	pinctrl-names = "default";
+status = "okay";
+pinctrl-0 = <&eth_mdio_pa2 &eth_mdc_pc1>;
+pinctrl-names = "default";
 
-	eth_phy: ethernet-phy@0 {
-		compatible = "ethernet-phy";
-		reg = <0x00>;
-		reset-gpios = <&gpioe 12 GPIO_ACTIVE_LOW>;
-	};
+eth_phy: ethernet-phy@0 {
+compatible = "ethernet-phy";
+reg = <0x00>;
+reset-gpios = <&gpioe 12 GPIO_ACTIVE_LOW>;
+};
 };
 
 &can1 {
-	pinctrl-0 = <&can1_rx_pd0 &can1_tx_pd1>;
-	pinctrl-names = "default";
-	status = "okay";
+pinctrl-0 = <&can1_rx_pd0 &can1_tx_pd1>;
+pinctrl-names = "default";
+status = "okay";
+};
+
+&sdmmc1 {
+status = "okay";
+pinctrl-0 = <&sdio_d0_pc8 &sdio_d1_pc9
+     &sdio_d2_pc10 &sdio_d3_pc11
+     &sdio_ck_pc12 &sdio_cmd_pd2>;
+pinctrl-names = "default";
+cd-gpios = <&gpiod 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+disk-name = "SD";
 };
 
 &plli2s {
-	div-m = <8>;
-	mul-n = <271>;
-	div-r = <2>;
-	clocks = <&clk_hse>;
-	status = "okay";
+div-m = <8>;
+mul-n = <271>;
+div-r = <2>;
+clocks = <&clk_hse>;
+status = "okay";
 };
 
 &i2s2 {
-	mck-enabled;
-	pinctrl-0 = <&i2s2_ck_pb10 &i2s2_ws_pb12
-		     &i2s2_sd_pc3 &i2s2_mck_pc6
-		     &spi2_miso_pc2>;
-	pinctrl-names = "default";
-	clocks = <&rcc STM32_CLOCK(APB1, 14)>,
-		 <&rcc STM32_SRC_PLLI2S_R I2S_SEL(0)>;
-	status = "okay";
+mck-enabled;
+pinctrl-0 = <&i2s2_ck_pb10 &i2s2_ws_pb9
+     &i2s2_sd_pc3 &i2s2_mck_pc6
+     &spi2_miso_pc2>;
+pinctrl-names = "default";
+clocks = <&rcc STM32_CLOCK(APB1, 14)>,
+ <&rcc STM32_SRC_PLLI2S_R I2S_SEL(0)>;
+status = "okay";
+};
+
+&timers9 {
+status = "okay";
+
+pwm9: pwm {
+status = "okay";
+pinctrl-0 = <&tim9_ch1_pe5 &tim9_ch2_pe6>;
+pinctrl-names = "default";
+};
 };
 
 &timers10 {
-	st,prescaler = <0>;
-	status = "okay";
+st,prescaler = <0>;
+status = "okay";
 
-	pwm10: pwm {
-		status = "okay";
-		pinctrl-0 = <&tim10_ch1_pb8>;
-		pinctrl-names = "default";
-	};
+pwm10: pwm {
+status = "okay";
+pinctrl-0 = <&tim10_ch1_pb8>;
+pinctrl-names = "default";
+};
 };
 
+&timers12 {
+status = "okay";
 
+pwm12: pwm {
+status = "okay";
+pinctrl-0 = <&tim12_ch1_pb14 &tim12_ch2_pb15>;
+pinctrl-names = "default";
+};
+};
