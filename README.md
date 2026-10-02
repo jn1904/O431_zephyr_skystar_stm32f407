@@ -64,15 +64,6 @@ O431_zephyr_skystar_stm32f407/
 
 ## 构建
 
-工作区里的 `zephyr-env.sh` 会把本 module 加入 `ZEPHYR_EXTRA_MODULES`。
-
-```bash
-cd /home/o431/sources/o431_obj
-source ./zephyr-env.sh
-
-west boards -n '^skystar'
-```
-
 构建带底板的 board：
 
 ```bash
