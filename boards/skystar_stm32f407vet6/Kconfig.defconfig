@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: MIT
+
+if BOARD_SKYSTAR_STM32F407VET6
+
+config SPI_STM32_INTERRUPT
+default y
+depends on SPI
+
+endif # BOARD_SKYSTAR_STM32F407VET6

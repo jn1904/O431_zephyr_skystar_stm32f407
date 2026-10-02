@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: MIT
+
+config BOARD_SKYSTAR_STM32F407VET6
+select SOC_STM32F407XE

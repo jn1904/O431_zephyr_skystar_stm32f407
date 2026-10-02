@@ -1,5 +1,5 @@
 identifier: skystar_stm32f407
-name: Skystar STM32F407VET6 Development Board
+name: LCKFB SkyStar STM32F407VET6 Baseboard
 type: mcu
 arch: arm
 toolchain:
@@ -8,18 +8,20 @@ toolchain:
 ram: 192
 flash: 512
 supported:
-  - gpio
-  - spi
-  - pwm
-  - i2c
-  - counter
   - adc
-  - qdec
-  - uart
-  - usb_device
+  - audio
   - can
-  - netif:eth
+  - counter
   - eeprom
+  - gpio
+  - i2c
   - i2s
+  - netif:eth
+  - pwm
+  - qdec
   - rtc
   - sdhc
+  - sensor
+  - spi
+  - uart
+  - usb_device

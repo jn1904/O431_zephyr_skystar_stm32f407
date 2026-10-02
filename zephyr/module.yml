@@ -1,0 +1,4 @@
+name: o431_skystar_stm32f407
+build:
+  settings:
+    board_root: .

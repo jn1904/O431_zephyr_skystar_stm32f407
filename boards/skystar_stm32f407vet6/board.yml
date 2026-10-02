@@ -1,0 +1,6 @@
+board:
+  name: skystar_stm32f407vet6
+  full_name: LCKFB SkyStar STM32F407VET6 Core Board
+  vendor: O431
+  socs:
+    - name: stm32f407xx

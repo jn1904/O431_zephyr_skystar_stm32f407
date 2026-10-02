@@ -1,0 +1,15 @@
+identifier: skystar_stm32f407vet6
+name: LCKFB SkyStar STM32F407VET6 Core Board
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+ram: 192
+flash: 512
+supported:
+  - gpio
+  - uart
+  - usb_device
+  - rtc
+  - watchdog

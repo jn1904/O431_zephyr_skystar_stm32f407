@@ -1,0 +1,547 @@
+/*
+* Copyright (c) 2025 O431
+*
+* SPDX-License-Identifier: MIT
+*
+* Zephyr board description for the LCKFB SkyStar STM32F407 baseboard.
+*/
+
+/dts-v1/;
+
+#include <st/f4/stm32f407Xe.dtsi>
+#include <st/f4/stm32f407v(e-g)tx-pinctrl.dtsi>
+#include <zephyr/dt-bindings/i2c/i2c.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+#include <zephyr/dt-bindings/led/led.h>
+#include <zephyr/dt-bindings/display/panel.h>
+#include <zephyr/dt-bindings/mipi_dbi/mipi_dbi.h>
+#include <zephyr/dt-bindings/pwm/pwm.h>
+#include <zephyr/dt-bindings/sensor/qdec_stm32.h>
+
+/ {
+	model = "LCKFB SkyStar STM32F407 baseboard";
+	compatible = "skystar,stm32f407";
+
+	chosen {
+		zephyr,console = &usart1;
+		zephyr,shell-uart = &usart1;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,dtcm = &ccm0;
+	};
+
+	leds: leds {
+		compatible = "gpio-leds";
+
+		green_led_1: led_1 {
+			gpios = <&gpiob 2 GPIO_ACTIVE_LOW>;
+			label = "Core board LED";
+		};
+	};
+
+	/*
+	* PB8 is shared by the green LED and the LCD backlight.
+	* It is driven as a PWM output; use the LED API or the PWM API.
+	*/
+	pwm_leds: pwm-leds {
+		compatible = "pwm-leds";
+
+		led_green: led_green {
+			pwms = <&pwm10 1 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+			label = "Green LED / LCD backlight";
+		};
+	};
+
+	/*
+	* PA6 is selected between the active buzzer and the passive
+	* buzzer through SW7 bit 4. The active buzzer is enabled by
+	* default; enable buzzer_p in an overlay for the passive one.
+	*/
+	buzz_0: buzz {
+		compatible = "gpio-buzzer";
+		status = "okay";
+		gpios = <&gpioa 6 GPIO_ACTIVE_HIGH>;
+	};
+
+	buzzer_p: buzzer-pwm {
+		compatible = "pwm-buzzer";
+		status = "disabled";
+		pwms = <&pwm13 1 PWM_HZ(2700) PWM_POLARITY_NORMAL>;
+	};
+
+	relays: relays {
+		compatible = "gpio-leds";
+
+		relay0: relay0 {
+			gpios = <&gpioa 4 GPIO_ACTIVE_HIGH>;
+			label = "Relay";
+		};
+	};
+
+	potentiometer: potentiometer {
+		compatible = "voltage-divider";
+		status = "okay";
+		io-channels = <&adc1 10>;
+		output-ohms = <10000>;
+		full-ohms = <10000>;
+	};
+
+	led_strip: ws2812 {
+		compatible = "worldsemi,ws2812-gpio";
+		status = "okay";
+		gpios = <&gpioa 3 GPIO_ACTIVE_HIGH>;
+		chain-length = <3>;
+		color-mapping = <LED_COLOR_ID_GREEN
+		LED_COLOR_ID_RED
+		LED_COLOR_ID_BLUE>;
+		reset-delay = <280>;
+	};
+
+	mipi_dbi: mipi-dbi {
+		compatible = "zephyr,mipi-dbi-spi";
+		spi-dev = <&spi1>;
+		dc-gpios = <&gpiod 14 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpioe 1 GPIO_ACTIVE_LOW>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		st7789v: st7789v@0 {
+			compatible = "sitronix,st7789v";
+			reg = <0>;
+			mipi-max-frequency = <20000000>;
+			width = <240>;
+			height = <320>;
+			x-offset = <0>;
+			y-offset = <0>;
+			vcom = <0x19>;
+			gctrl = <0x35>;
+			vrhs = <0x12>;
+			vdvs = <0x20>;
+			mdac = <0x00>;
+			gamma = <0x01>;
+			pixel-format = <PANEL_PIXEL_FORMAT_RGB_565>;
+			lcm = <0x2c>;
+			porch-param = [0c 0c 00 33 33];
+			cmd2en-param = [5a 69 02 01];
+			pwctrl1-param = [a4 a1];
+			pvgam-param = [d0 04 0d 11 13 2b 3f 54 4c 18 0d 0b 1f 23];
+			nvgam-param = [d0 04 0c 11 13 2c 3f 44 51 2f 1f 1f 20 23];
+			ram-param = [00 f0];
+			rgb-param = [cd 08 14];
+			mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
+		};
+	};
+
+	gpio_keys: gpio-keys {
+		compatible = "gpio-keys";
+
+		user_button_0: K0 {
+			label = "KEY1";
+			gpios = <&gpioa 0 GPIO_ACTIVE_LOW>;
+			zephyr,code = <INPUT_KEY_0>;
+		};
+
+		user_button_1: K1 {
+			label = "KEY2";
+			gpios = <&gpioe 8 GPIO_ACTIVE_LOW>;
+			zephyr,code = <INPUT_KEY_1>;
+		};
+
+		user_button_UP: K_UP {
+			label = "KEY3 / EC11 push";
+			gpios = <&gpioc 13 GPIO_ACTIVE_LOW>;
+			zephyr,code = <INPUT_KEY_2>;
+		};
+	};
+
+	aliases {
+		led0 = &green_led_1;
+		buzz = &buzz_0;
+		sw0 = &user_button_0;
+		sw1 = &user_button_1;
+		sw2 = &user_button_UP;
+		qdec0 = &qdec;
+		qdec1 = &qdec1;
+		qdec2 = &qdec2;
+		sdhc0 = &sdmmc1;
+		stepper-driver = &tmc2209;
+		stepper-ctrl = &step_dir_motion_control;
+	};
+
+	/*
+	* PD10/PE13 are used as a software I2C bus for the LCD touch
+	* controller and for the external I2C2 header.
+	*/
+	i2cgpio: i2c-gpio {
+		compatible = "gpio-i2c";
+		status = "okay";
+		scl-gpios = <&gpiod 10 (GPIO_OPEN_DRAIN | GPIO_PULL_UP)>;
+		sda-gpios = <&gpioe 13 (GPIO_OPEN_DRAIN | GPIO_PULL_UP)>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		clock-frequency = <100000>;
+
+		ft6336: touch@38 {
+			compatible = "focaltech,ft5336";
+			reg = <0x38>;
+			int-gpios = <&gpioe 2 GPIO_ACTIVE_LOW>;
+			reset-gpios = <&gpioe 1 GPIO_ACTIVE_LOW>;
+		};
+
+		ap3216c: sensor@1e {
+			compatible = "liteon,ap3216c";
+			reg = <0x1e>;
+		};
+	};
+
+	w1: w1 {
+		compatible = "zephyr,w1-gpio";
+		status = "okay";
+		gpios = <&gpioa 8 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN | GPIO_PULL_UP)>;
+	};
+
+	/*
+	* TMC2209 and its step/dir motion controller.
+	* STEP = PA15, DIR = PD4, EN = PD7.
+	*/
+	tmc2209: tmc2209 {
+		compatible = "adi,tmc2209";
+		status = "okay";
+		en-gpios = <&gpiod 7 GPIO_ACTIVE_LOW>;
+		micro-step-res = <8>;
+	};
+
+	step_dir_motion_control: motion-controller {
+		compatible = "zephyr,gpio-step-dir-stepper-ctrl";
+		status = "okay";
+		step-gpios = <&gpioa 15 GPIO_ACTIVE_HIGH>;
+		dir-gpios = <&gpiod 4 GPIO_ACTIVE_HIGH>;
+		stepper-driver = <&tmc2209>;
+	};
+
+	/*
+	* HX711 is connected as a two-wire bit-banged device:
+	* DOUT = PB0, PD_SCK = PB1.
+	*/
+	hx711_spi: spi {
+		compatible = "zephyr,spi-bitbang";
+		status = "okay";
+		clk-gpios = <&gpiob 1 GPIO_ACTIVE_HIGH>;
+		sdi-gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		hx711: hx711@0 {
+			compatible = "avia,hx711-spi";
+			reg = <0>;
+			status = "okay";
+			spi-max-frequency = <1000000>;
+			gain = <128>;
+			avdd = <3300>;
+			dout-trig-gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;
+		};
+	};
+};
+
+&clk_hse {
+	clock-frequency = <DT_FREQ_M(8)>;
+	status = "okay";
+};
+
+&clk_lse {
+	status = "okay";
+};
+
+&pll {
+	div-m = <8>;
+	mul-n = <336>;
+	div-p = <2>;
+	div-q = <7>;
+	clocks = <&clk_hse>;
+	status = "okay";
+};
+
+&rcc {
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(168)>;
+	ahb-prescaler = <1>;
+	apb1-prescaler = <4>;
+	apb2-prescaler = <2>;
+};
+
+&usart1 {
+	pinctrl-0 = <&usart1_tx_pa9 &usart1_rx_pa10>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+	status = "okay";
+};
+
+&usart2 {
+	pinctrl-0 = <&usart2_tx_pd5 &usart2_rx_pd6>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+	status = "okay";
+};
+
+&usart3 {
+	pinctrl-0 = <&usart3_tx_pd8 &usart3_rx_pd9>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+	status = "okay";
+
+	modbus0: modbus0 {
+		compatible = "zephyr,modbus-serial";
+		de-gpios = <&gpiod 15 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&timers1 {
+	status = "okay";
+
+	qdec2: qdec {
+		status = "okay";
+		pinctrl-0 = <&tim1_ch1_pe9 &tim1_ch2_pe11>;
+		pinctrl-names = "default";
+		st,counts-per-revolution = <1>;
+	};
+};
+
+&timers3 {
+	status = "okay";
+
+	qdec1: qdec {
+		status = "okay";
+		pinctrl-0 = <&tim3_ch1_pb4 &tim3_ch2_pc7>;
+		pinctrl-names = "default";
+		st,counts-per-revolution = <1>;
+	};
+};
+
+&timers4 {
+	status = "okay";
+
+	qdec: qdec {
+		status = "okay";
+		pinctrl-0 = <&tim4_ch1_pd12 &tim4_ch2_pd13>;
+		pinctrl-names = "default";
+		st,counts-per-revolution = <20>;
+	};
+};
+
+&rtc {
+	clocks = <&rcc STM32_CLOCK(APB1, 28)>,
+	<&rcc STM32_SRC_LSE RTC_SEL(1)>;
+	status = "okay";
+};
+
+&i2c1 {
+	pinctrl-0 = <&i2c1_scl_pb6 &i2c1_sda_pb7>;
+	pinctrl-names = "default";
+	clock-frequency = <I2C_BITRATE_FAST>;
+	status = "okay";
+
+	aht20: aht20@38 {
+		compatible = "aosong,aht20";
+		reg = <0x38>;
+	};
+
+	sd3078: rtc@32 {
+		compatible = "whwave,sd3078";
+		reg = <0x32>;
+		int-gpios = <&gpioe 3 GPIO_ACTIVE_LOW>;
+	};
+
+	eeprom0: eeprom@50 {
+		compatible = "atmel,at24c02", "atmel,at24";
+		reg = <0x50>;
+		size = <256>;
+		pagesize = <8>;
+		address-width = <8>;
+		timeout = <5>;
+	};
+
+	es8388: audio-codec@10 {
+		compatible = "everest,es8388";
+		reg = <0x10>;
+	};
+
+	pca9555: gpio@20 {
+		compatible = "nxp,pca9555";
+		reg = <0x20>;
+		gpio-controller;
+		#gpio-cells = <2>;
+		ngpios = <16>;
+	};
+
+	ina226: ina226@40 {
+		compatible = "ti,ina226";
+		reg = <0x40>;
+		current-lsb-microamps = <300>;
+		rshunt-micro-ohms = <10000>;
+	};
+};
+
+&adc1 {
+	pinctrl-0 = <&adc1_in10_pc0>;
+	pinctrl-names = "default";
+	st,adc-prescaler = <4>;
+	status = "okay";
+};
+
+&spi1 {
+	pinctrl-0 = <&spi1_sck_pa5 &spi1_mosi_pb5>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpioe 14 GPIO_ACTIVE_LOW>;
+	status = "okay";
+};
+
+&spi2 {
+	pinctrl-0 = <&spi2_sck_pb10 &spi2_miso_pc2 &spi2_mosi_pc3>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpioe 7 GPIO_ACTIVE_LOW>,
+	<&gpioe 4 GPIO_ACTIVE_LOW>,
+	<&gpiod 11 GPIO_ACTIVE_LOW>,
+	<&gpioe 0 GPIO_ACTIVE_LOW>,
+	<&gpioe 15 GPIO_ACTIVE_LOW>;
+	status = "okay";
+
+	icm42688: icm42688@0 {
+		compatible = "invensense,icm42688", "invensense,icm4268x";
+		reg = <0>;
+		spi-max-frequency = <10000000>;
+		accel-pwr-mode = <3>;
+		gyro-pwr-mode = <3>;
+		accel-fs = <3>;
+		gyro-fs = <7>;
+		accel-odr = <8>;
+		gyro-odr = <8>;
+	};
+
+	w25q128: w25q128@1 {
+		compatible = "jedec,spi-nor";
+		reg = <1>;
+		spi-max-frequency = <40000000>;
+		size = <DT_SIZE_M(128)>;
+		jedec-id = [ef 40 18];
+		has-dpd;
+		t-enter-dpd = <3000>;
+		t-exit-dpd = <3000>;
+	};
+};
+
+zephyr_udc0: &usbotg_fs {
+	pinctrl-0 = <&usb_otg_fs_dm_pa11 &usb_otg_fs_dp_pa12>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&mac {
+	status = "okay";
+	pinctrl-0 = <&eth_ref_clk_pa1
+	&eth_crs_dv_pa7
+	&eth_rxd0_pc4
+	&eth_rxd1_pc5
+	&eth_tx_en_pb11
+	&eth_txd0_pb12
+	&eth_txd1_pb13>;
+	pinctrl-names = "default";
+	phy-connection-type = "rmii";
+	phy-handle = <&eth_phy>;
+};
+
+&mdio {
+	status = "okay";
+	pinctrl-0 = <&eth_mdio_pa2 &eth_mdc_pc1>;
+	pinctrl-names = "default";
+
+	eth_phy: ethernet-phy@0 {
+		compatible = "ethernet-phy";
+		reg = <0x00>;
+		reset-gpios = <&gpioe 12 GPIO_ACTIVE_LOW>;
+	};
+};
+
+&can1 {
+	pinctrl-0 = <&can1_rx_pd0 &can1_tx_pd1>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&sdmmc1 {
+	status = "okay";
+	pinctrl-0 = <&sdio_d0_pc8 &sdio_d1_pc9
+	&sdio_d2_pc10 &sdio_d3_pc11
+	&sdio_ck_pc12 &sdio_cmd_pd2>;
+	pinctrl-names = "default";
+	cd-gpios = <&gpiod 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+	bus-width = <4>;
+	disk-name = "SD";
+};
+
+&plli2s {
+	div-m = <8>;
+	mul-n = <271>;
+	div-r = <2>;
+	clocks = <&clk_hse>;
+	status = "okay";
+};
+
+&i2s2 {
+	mck-enabled;
+	pinctrl-0 = <&i2s2_ck_pb10 &i2s2_ws_pb9
+	&i2s2_sd_pc3 &i2s2_mck_pc6
+	&spi2_miso_pc2>;
+	pinctrl-names = "default";
+	clocks = <&rcc STM32_CLOCK(APB1, 14)>,
+	<&rcc STM32_SRC_PLLI2S_R I2S_SEL(0)>;
+	status = "okay";
+};
+
+&timers9 {
+	status = "okay";
+
+	pwm9: pwm {
+		status = "okay";
+		pinctrl-0 = <&tim9_ch1_pe5 &tim9_ch2_pe6>;
+		pinctrl-names = "default";
+	};
+};
+
+&timers10 {
+	st,prescaler = <0>;
+	status = "okay";
+
+	pwm10: pwm {
+		status = "okay";
+		pinctrl-0 = <&tim10_ch1_pb8>;
+		pinctrl-names = "default";
+	};
+};
+
+&timers12 {
+	status = "okay";
+
+	pwm12: pwm {
+		status = "okay";
+		pinctrl-0 = <&tim12_ch1_pb14 &tim12_ch2_pb15>;
+		pinctrl-names = "default";
+	};
+};
+
+&timers13 {
+	status = "okay";
+
+	pwm13: pwm {
+		status = "disabled";
+		pinctrl-0 = <&tim13_ch1_pa6>;
+		pinctrl-names = "default";
+	};
+};
+
+&dma1 {
+	status = "okay";
+};
+
+&dma2 {
+	status = "okay";
+};

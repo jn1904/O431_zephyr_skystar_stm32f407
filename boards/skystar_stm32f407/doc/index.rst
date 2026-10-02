@@ -3,8 +3,9 @@
 概述
 ********
 
-SKYSTAR_STM32F407 开发板搭载基于 ARM Cortex-M4 架构的 STM32F407VET6 MCU，
-具备丰富的连接支持与灵活的配置选项。
+SKYSTAR_STM32F407 是立创开发板的“天空星筑基学习板”，核心 MCU 为
+STM32F407VET6（ARM Cortex-M4，LQFP100，最高 168 MHz）。
+本文档的引脚分配只以筑基学习板为准。
 
 硬件资源
 ********
@@ -24,6 +25,13 @@ SKYSTAR_STM32F407 开发板提供以下硬件组件：
 - USB 2.0 OTG FS，内置片上 PHY
 - 10/100 以太网 MAC，带专用 DMA
 - SPI、I2C、UART、CAN、SDIO
+- 以太网 LAN8720A、隔离 CAN、隔离 RS485
+- I2C1 六设备总线、I2C2 触摸/外扩总线
+- LCD SPI 屏幕 + FT6336 触摸
+- WS2812 RGB、蜂鸣器、继电器、电位器
+- TF / SDIO、外部 SPI 扩展
+- 直流电机、舵机、TMC2209 步进电机
+- HX711、单总线、HX711 外扩 ADC
 
 有关 STM32F407VE SOC 的更多信息，请参阅：
 - `STM32F407VE on www.st.com`_
@@ -73,6 +81,9 @@ SKYSTAR_STM32F407 开发板提供以下硬件组件：
    * - LCD 控制
      - BL_PWM / CS / DC / RST / TP_INT
      - PB8 / PE14 / PD14 / PE1 / PE2
+   * - 绿色 LED / 屏幕背光
+     - TIM10_CH1 PWM
+     - PB8
    * - 音频 ES8388
      - I2S2_WS / SCK / EXT_SD / SD / MCK
      - PB9 / PB10 / PC2 / PC3 / PC6
@@ -91,8 +102,8 @@ SKYSTAR_STM32F407 开发板提供以下硬件组件：
    * - 继电器
      - RELAY
      - PA4
-   * - 蜂鸣器
-     - BUZZ
+   * - 蜂鸣器（有源/无源二选一）
+     - GPIO / TIM13_CH1
      - PA6
    * - WS2812
      - RGB_DATA
@@ -127,10 +138,15 @@ SKYSTAR_STM32F407 开发板提供以下硬件组件：
 
 .. note::
 
-   官方底板使用多路拨码开关在部分复用功能之间切换：
-   SPI2/I2S2、蜂鸣器有源/无源、EC11/电机 2 编码器、
-   舵机/电机 2、板载 RGB/外部灯条、HX711/ADC 排针等。
-   因此同一时刻只能使能其中一路。
+   - 核心板 PB2 为普通 GPIO LED，DTS 中作为 ``led0``。
+   - PB8 同时作为绿色 LED 和 LCD 背光，当前 DTS 使用 ``pwm-leds`` 建模。
+   - 蜂鸣器 PA6 由 SW7 bit4 选择有源/无源，DTS 默认使能有源蜂鸣器，
+     无源 PWM 节点默认关闭。
+   - 官方底板使用多路拨码开关在部分复用功能之间切换：
+     SPI2/I2S2、蜂鸣器有源/无源、EC11/电机 2 编码器、
+     舵机/电机 2、板载 RGB/外部灯条、HX711/ADC 排针等。
+     因此同一时刻只能使能其中一路。
+   - QDEC 的 ``st,counts-per-revolution`` 需要根据实际编码器 PPR 调整。
 
 系统时钟
 ============
@@ -153,14 +169,18 @@ SKYSTAR_STM32F407 开发板提供以下硬件组件：
 .. code-block:: console
 
    west build -p always -b skystar_stm32f407 samples/basic/blinky
-   west flash / ./openocd.sh
+   west flash
 
-或显式指定烧录工具：
+默认烧录器是 OpenOCD + CMSIS-DAP。
+
+也可以显式指定烧录器：
 
 .. code-block:: console
 
-   west flash -r pyocd
    west flash -r openocd
+   west flash -r pyocd
+   west flash -r jlink
+   west flash -r dfu-util
 
 .. _STM32F407VE on www.st.com:
    https://www.st.com/en/microcontrollers/stm32f407ve.html
